@@ -69,7 +69,7 @@
             }, Math.random() * 2000 + 2000);
           });
 
-          setTimeout(startViewportFlicker, 4500);
+          setTimeout(startViewportFlicker, 5500);
         })
         .catch((error) =>
           console.error("Error loading opacity values:", error)
@@ -86,12 +86,19 @@
         const cols = Math.ceil(canvas.width / pixelSize);
         const rows = Math.ceil(canvas.height / pixelSize);
 
+        let elapsedTime = 0; // Track elapsed time
+        const duration = 2100; // Total duration of the flicker effect in milliseconds
+
         function drawFlicker() {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+          // Calculate the minimum alpha based on elapsed time
+          const progress = Math.min(elapsedTime / duration, 1); // Progress from 0 to 1
+          const minAlpha = progress; // Start at 0 and increase to 0.5
+
           for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
-              const alpha = Math.random() * 0.5 + 0.5; // Random alpha for flicker effect
+              const alpha = Math.random() * (0.5 - minAlpha) + minAlpha; // Alpha increases over time
               ctx.fillStyle = `rgba(255, 152, 253, ${alpha})`;
               ctx.fillRect(
                 col * pixelSize,
@@ -101,6 +108,8 @@
               );
             }
           }
+
+          elapsedTime += 100; // Increment elapsed time by the interval duration
         }
 
         const flickerInterval = setInterval(drawFlicker, 100);
@@ -113,7 +122,7 @@
           const pixelGrid = document.getElementById("pixelGrid");
           if (pixelGrid) pixelGrid.remove();
           canvas.remove();
-        }, 6000);
+        }, duration);
       }
     </script>
   </body>
