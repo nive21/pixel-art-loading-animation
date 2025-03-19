@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Art Animation</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #222;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(20, 8px);
+        grid-template-rows: repeat(20, 8px);
+        gap: 0px;
+      }
+      .pixel {
+        width: 8px;
+        height: 8px;
+        background: rgba(255, 255, 255, 1);
+        transition: background 0.4s ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid" id="pixelGrid"></div>
+
+    <script>
+      function biasedRandomAlpha(targetAlpha, variance = 0.3) {
+        let deviation = (Math.random() - 0.5) * 2 * variance;
+        return Math.min(1, Math.max(0, targetAlpha + deviation)); // Ensure within [0,1]
+      }
+
+      fetch("full_opacity_values.json")
+        .then((response) => response.json())
+        .then((finalAlphaValues) => {
+          const grid = document.getElementById("pixelGrid");
+          let pixels = [];
+
+          for (let row = 0; row < 20; row++) {
+            for (let col = 0; col < 20; col++) {
+              let pixel = document.createElement("div");
+              pixel.classList.add("pixel");
+
+              let finalAlpha = finalAlphaValues[row][col];
+              let initialAlpha = biasedRandomAlpha(finalAlpha, 0.4);
+
+              pixel.style.background = `rgba(255, 255, 255, ${initialAlpha})`;
+              pixels.push({ element: pixel, finalAlpha, settled: false });
+              grid.appendChild(pixel);
+            }
+          }
+
+          // Flickering effect with independent control
+          let flickeringInterval = setInterval(() => {
+            let allSettled = true;
+            pixels.forEach(({ element, finalAlpha, settled }) => {
+              if (!settled) {
+                let flickerAlpha = biasedRandomAlpha(finalAlpha, 0.3);
+                element.style.background = `rgba(255, 255, 255, ${flickerAlpha})`;
+                allSettled = false;
+              }
+            });
+
+            // Stop flickering entirely when all pixels have settled
+            if (allSettled) {
+              clearInterval(flickeringInterval);
+            }
+          }, 150);
+
+          // Gradually settle pixels at different times (4s-6s)
+          pixels.forEach(({ element, finalAlpha }, index) => {
+            let settleTime = Math.random() * 2000 + 4000; // Between 4s - 6s
+
+            setTimeout(() => {
+              element.style.transition = "background 1.2s ease-in-out";
+              element.style.background = `rgba(255, 255, 255, ${finalAlpha})`;
+
+              // Mark pixel as settled
+              pixels[index].settled = true;
+            }, settleTime);
+          });
+
+          // Final correction: Ensure all pixels exactly match at 6s
+          setTimeout(() => {
+            clearInterval(flickeringInterval);
+            pixels.forEach(({ element, finalAlpha }) => {
+              element.style.background = `rgba(255, 255, 255, ${finalAlpha})`;
+            });
+          }, 6000);
+        })
+        .catch((error) =>
+          console.error("Error loading opacity values:", error)
+        );
+    </script>
+  </body>
+</html>
