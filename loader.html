@@ -10,7 +10,7 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background: #222;
+        background: #ff98fd;
       }
       .grid {
         display: grid;
@@ -72,12 +72,12 @@
             }
           }, 150);
 
-          // Gradually settle pixels at different times (4s-6s)
+          // Gradually settle pixels at different times (3s-5s)
           pixels.forEach(({ element, finalAlpha }, index) => {
-            let settleTime = Math.random() * 2000 + 4000; // Between 4s - 6s
+            let settleTime = Math.random() * 2000 + 3000; // Between 3s - 5s
 
             setTimeout(() => {
-              element.style.transition = "background 1.2s ease-in-out";
+              element.style.transition = "background 0.15s ease-in-out";
               element.style.background = `rgba(255, 255, 255, ${finalAlpha})`;
 
               // Mark pixel as settled
@@ -85,13 +85,13 @@
             }, settleTime);
           });
 
-          // Final correction: Ensure all pixels exactly match at 6s
+          // Final correction: Ensure all pixels exactly match at 5s
           setTimeout(() => {
             clearInterval(flickeringInterval);
             pixels.forEach(({ element, finalAlpha }) => {
               element.style.background = `rgba(255, 255, 255, ${finalAlpha})`;
             });
-          }, 6000);
+          }, 5000);
         })
         .catch((error) =>
           console.error("Error loading opacity values:", error)
