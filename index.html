@@ -98,7 +98,7 @@
 
           for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
-              const alpha = Math.random() * (0.5 - minAlpha) + minAlpha; // Alpha increases over time
+              const alpha = Math.random() * minAlpha; // Alpha increases over time
               ctx.fillStyle = `rgba(255, 152, 253, ${alpha})`;
               ctx.fillRect(
                 col * pixelSize,
