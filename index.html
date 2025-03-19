@@ -12,49 +12,25 @@
         height: 100vh;
         background: #ece4dc;
         overflow: hidden;
+        margin: 0;
       }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(20, 8px);
-        grid-template-rows: repeat(20, 8px);
-        gap: 0px;
-      }
-      .pixel {
-        width: 8px;
-        height: 8px;
-        background: rgba(255, 152, 253, 1);
-        transition: background 0.4s ease-in-out;
-      }
-      .viewport-grid {
+      canvas {
         position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+      }
+      #pixelGrid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, 8px);
-        grid-template-rows: repeat(auto-fill, 8px);
-      }
-      .viewport-pixel {
-        width: 8px;
-        height: 8px;
-        background: #ece4dc;
-        transition: background 0.15s ease-in-out;
-      }
-
-      @keyframes flicker {
-        0% {
-          background: rgba(255, 152, 253, 0);
-        }
-        100% {
-          background: rgba(255, 152, 253, 1);
-        }
+        grid-template-columns: repeat(20, 8px); /* 20 columns, each 8px wide */
+        grid-template-rows: repeat(20, 8px); /* 20 rows, each 8px tall */
+        gap: 0; /* No gap between grid items */
+        position: absolute;
       }
     </style>
   </head>
   <body>
     <div class="grid" id="pixelGrid"></div>
-    <div class="viewport-grid" id="viewportGrid"></div>
+    <canvas id="viewportCanvas"></canvas>
 
     <script>
       function biasedRandomAlpha(targetAlpha, variance = 0.3) {
@@ -71,60 +47,73 @@
           for (let row = 0; row < 20; row++) {
             for (let col = 0; col < 20; col++) {
               let pixel = document.createElement("div");
+              pixel.style.width = "8px";
+              pixel.style.height = "8px";
+              pixel.style.background = `rgba(255, 152, 253, ${biasedRandomAlpha(
+                finalAlphaValues[row][col],
+                0.4
+              )})`;
+              pixel.style.transition = "background 0.4s ease-in-out";
               pixel.classList.add("pixel");
-
-              let finalAlpha = finalAlphaValues[row][col];
-              let initialAlpha = biasedRandomAlpha(finalAlpha, 0.4);
-
-              pixel.style.background = `rgba(255, 152, 253, ${initialAlpha})`;
-              pixels.push({ element: pixel, finalAlpha, settled: false });
+              pixels.push({
+                element: pixel,
+                finalAlpha: finalAlphaValues[row][col],
+              });
               grid.appendChild(pixel);
             }
           }
 
           pixels.forEach(({ element, finalAlpha }, index) => {
-            let settleTime = Math.random() * 2000 + 2000;
-
             setTimeout(() => {
-              element.style.transition = "background 0.15s ease-in-out";
               element.style.background = `rgba(255, 152, 253, ${finalAlpha})`;
-              pixels[index].settled = true;
-            }, settleTime);
+            }, Math.random() * 2000 + 2000);
           });
 
-          setTimeout(startViewportFlicker, 4000);
+          setTimeout(startViewportFlicker, 4500);
         })
         .catch((error) =>
           console.error("Error loading opacity values:", error)
         );
 
       function startViewportFlicker() {
-        const viewportGrid = document.getElementById("viewportGrid");
+        const canvas = document.getElementById("viewportCanvas");
+        const ctx = canvas.getContext("2d");
         const pixelSize = 8;
-        const cols = Math.ceil(window.innerWidth / pixelSize);
-        const rows = Math.ceil(window.innerHeight / pixelSize);
 
-        viewportGrid.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
-        viewportGrid.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        for (let i = 0; i < cols * rows; i++) {
-          let pixel = document.createElement("div");
-          pixel.classList.add("viewport-pixel");
-          pixel.style.animation = `flicker ${
-            Math.random() * 3 + 4
-          }s ease-in-out forwards`;
-          viewportGrid.appendChild(pixel);
+        const cols = Math.ceil(canvas.width / pixelSize);
+        const rows = Math.ceil(canvas.height / pixelSize);
+
+        function drawFlicker() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+              const alpha = Math.random() * 0.5 + 0.5; // Random alpha for flicker effect
+              ctx.fillStyle = `rgba(255, 152, 253, ${alpha})`;
+              ctx.fillRect(
+                col * pixelSize,
+                row * pixelSize,
+                pixelSize,
+                pixelSize
+              );
+            }
+          }
         }
 
+        const flickerInterval = setInterval(drawFlicker, 100);
+
         setTimeout(() => {
+          clearInterval(flickerInterval);
           document.body.style.background = "rgba(255, 152, 253, 1)";
 
-          // Remove the viewportGrid and pixelGrid elements
-          const viewportGrid = document.getElementById("viewportGrid");
+          // Remove the pixel grid and canvas
           const pixelGrid = document.getElementById("pixelGrid");
-          if (viewportGrid) viewportGrid.remove();
           if (pixelGrid) pixelGrid.remove();
-        }, 7000);
+          canvas.remove();
+        }, 6000);
       }
     </script>
   </body>
