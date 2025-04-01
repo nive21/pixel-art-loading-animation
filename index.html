@@ -19,111 +19,17 @@
         top: 0;
         left: 0;
       }
-      #pixelGrid {
-        display: grid;
-        grid-template-columns: repeat(20, 8px); /* 20 columns, each 8px wide */
-        grid-template-rows: repeat(20, 8px); /* 20 rows, each 8px tall */
-        gap: 0; /* No gap between grid items */
-        position: absolute;
+      #pixelGridCanvas {
+        position: relative;
+        margin: auto;
       }
     </style>
+    <script src="script.js" defer></script>
   </head>
   <body>
-    <div class="grid" id="pixelGrid"></div>
-    <canvas id="viewportCanvas"></canvas>
-
-    <script>
-      function biasedRandomAlpha(targetAlpha, variance = 0.3) {
-        let deviation = (Math.random() - 0.5) * 2 * variance;
-        return Math.min(1, Math.max(0, targetAlpha + deviation));
-      }
-
-      fetch("full_opacity_values.json")
-        .then((response) => response.json())
-        .then((finalAlphaValues) => {
-          const grid = document.getElementById("pixelGrid");
-          let pixels = [];
-
-          for (let row = 0; row < 20; row++) {
-            for (let col = 0; col < 20; col++) {
-              let pixel = document.createElement("div");
-              pixel.style.width = "8px";
-              pixel.style.height = "8px";
-              pixel.style.background = `rgba(255, 152, 253, ${biasedRandomAlpha(
-                finalAlphaValues[row][col],
-                0.4
-              )})`;
-              pixel.style.transition = "background 0.4s ease-in-out";
-              pixel.classList.add("pixel");
-              pixels.push({
-                element: pixel,
-                finalAlpha: finalAlphaValues[row][col],
-              });
-              grid.appendChild(pixel);
-            }
-          }
-
-          pixels.forEach(({ element, finalAlpha }, index) => {
-            setTimeout(() => {
-              element.style.background = `rgba(255, 152, 253, ${finalAlpha})`;
-            }, Math.random() * 2000 + 2000);
-          });
-
-          setTimeout(startViewportFlicker, 5500);
-        })
-        .catch((error) =>
-          console.error("Error loading opacity values:", error)
-        );
-
-      function startViewportFlicker() {
-        const canvas = document.getElementById("viewportCanvas");
-        const ctx = canvas.getContext("2d");
-        const pixelSize = 8;
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const cols = Math.ceil(canvas.width / pixelSize);
-        const rows = Math.ceil(canvas.height / pixelSize);
-
-        let elapsedTime = 0; // Track elapsed time
-        const duration = 2100; // Total duration of the flicker effect in milliseconds
-
-        function drawFlicker() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          // Calculate the minimum alpha based on elapsed time
-          const progress = Math.min(elapsedTime / duration, 1); // Progress from 0 to 1
-          const minAlpha = progress; // Start at 0 and increase to 0.5
-
-          for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-              const alpha = Math.random() * minAlpha; // Alpha increases over time
-              ctx.fillStyle = `rgba(255, 152, 253, ${alpha})`;
-              ctx.fillRect(
-                col * pixelSize,
-                row * pixelSize,
-                pixelSize,
-                pixelSize
-              );
-            }
-          }
-
-          elapsedTime += 100; // Increment elapsed time by the interval duration
-        }
-
-        const flickerInterval = setInterval(drawFlicker, 100);
-
-        setTimeout(() => {
-          clearInterval(flickerInterval);
-          document.body.style.background = "rgba(255, 152, 253, 1)";
-
-          // Remove the pixel grid and canvas
-          const pixelGrid = document.getElementById("pixelGrid");
-          if (pixelGrid) pixelGrid.remove();
-          canvas.remove();
-        }, duration);
-      }
-    </script>
+    <div class="container">
+      <canvas id="pixelGridCanvas"></canvas>
+      <canvas id="viewportCanvas"></canvas>
+    </div>
   </body>
 </html>
