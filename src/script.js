@@ -101,7 +101,9 @@ function startViewportFlicker() {
   }, duration);
 }
 
-fetch("full_opacity_values.json")
+fetch(
+  "https://raw.githubusercontent.com/nive21/pixel-art-loading-animation/main/full_opacity_values.json"
+)
   .then((response) => response.json())
   .then((finalAlphaValues) => {
     drawPixelGrid(finalAlphaValues); // Start pixel grid animation
